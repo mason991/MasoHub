@@ -1,6 +1,6 @@
 -- Load Kavo UI Library
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("MM2 OP Hub - Beast Mode", "Ocean")
+local Window = Library.CreateLib("MM2 OP Hub - Beast Mode 2025", "Ocean")
 
 -- Notification on Script Execution
 local StarterGui = game:GetService("StarterGui")
@@ -14,160 +14,154 @@ StarterGui:SetCore("SendNotification", {
 local TabMain = Window:NewTab("Main")
 local TabPlayer = Window:NewTab("Player")
 local TabExtras = Window:NewTab("Extras")
+local TabTroll = Window:NewTab("Troll")
 
 -- Sections
 local SectionMain = TabMain:NewSection("MM2 Features")
 local SectionPlayer = TabPlayer:NewSection("Player Settings")
 local SectionExtras = TabExtras:NewSection("Beast Features")
+local SectionTroll = TabTroll:NewSection("Trolling Tools")
 
--- MM2 Kill All
-SectionMain:NewButton("Kill All", "Kills all players (if Murderer)", function()
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") then
-            v.Character.Humanoid.Health = 0
-        end
+-- Keybind to Open UI
+StarterGui:SetCore("SendNotification", {
+    Title = "MM2 OP Hub",
+    Text = "Press K to open UI",
+    Duration = 6
+})
+
+local UserInputService = game:GetService("UserInputService")
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.K and not gameProcessed then
+        Library:ToggleUI()
     end
 end)
 
--- MM2 Fling Murderer
-SectionMain:NewButton("Fling Murderer", "Flings the Murderer", function()
+-- MM2 Features (Example, expand as needed)
+SectionMain:NewButton("Auto Win", "Teleport to MM2 map to win", function()
+    local maps = workspace:FindFirstChild("Map")
+    if maps then
+        game.Players.LocalPlayer.Character:MoveTo(maps.Position + Vector3.new(0, 5, 0))
+    else
+        warn("Map not found")
+    end
+end)
+
+SectionMain:NewButton("Fling Murderer", "Fling the murderer", function()
     for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr ~= game.Players.LocalPlayer and (plr.Backpack:FindFirstChild("Knife") or (plr.Character and plr.Character:FindFirstChild("Knife"))) then
-            local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.Velocity = Vector3.new(200, 200, 200)
+        if plr ~= game.Players.LocalPlayer and plr.Backpack:FindFirstChild("Knife") or (plr.Character and plr.Character:FindFirstChild("Knife")) then
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 500, 0)
             end
         end
     end
 end)
 
--- MM2 Fling Sheriff
-SectionMain:NewButton("Fling Sheriff", "Flings the Sheriff", function()
+SectionMain:NewButton("Fling Sheriff", "Fling the sheriff", function()
     for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr ~= game.Players.LocalPlayer and (plr.Backpack:FindFirstChild("Gun") or (plr.Character and plr.Character:FindFirstChild("Gun"))) then
-            local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.Velocity = Vector3.new(200, 200, 200)
+        if plr ~= game.Players.LocalPlayer and plr.Backpack:FindFirstChild("Gun") or (plr.Character and plr.Character:FindFirstChild("Gun")) then
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 500, 0)
             end
         end
     end
 end)
 
--- MM2 Auto Coin Collect
-SectionMain:NewButton("Auto Collect Coins", "Teleports to coins automatically", function()
-    getgenv().autoCoinCollect = true
-    while getgenv().autoCoinCollect do
-        wait(0.5)
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v.Name == "CoinContainer" or v.Name == "Coin" then
-                pcall(function()
-                    game.Players.LocalPlayer.Character:MoveTo(v.Position)
-                end)
-            end
-        end
-    end
-end)
-
--- MM2 Auto Win - Teleport to Map
-SectionMain:NewButton("Auto Win (Teleport to Map)", "Teleports you to MM2 map spawn", function()
-    local map = workspace:FindFirstChild("Map")
-    if map then
-        local spawn = map:FindFirstChildWhichIsA("SpawnLocation")
-        if spawn then
-            game.Players.LocalPlayer.Character:MoveTo(spawn.Position)
-        else
-            for _, v in pairs(map:GetDescendants()) do
-                if v:IsA("BasePart") and v.Name:lower():find("spawn") then
-                    game.Players.LocalPlayer.Character:MoveTo(v.Position)
-                    break
-                end
-            end
-        end
-    end
-end)
-
--- MM2 Role ESP (Improved Detection)
-SectionMain:NewButton("Enable Role ESP", "Shows Murderer & Sheriff", function()
-    for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr ~= game.Players.LocalPlayer then
-            local head = plr.Character and plr.Character:FindFirstChild("Head")
-            if head and not head:FindFirstChild("RoleESP") then
-                local espTag = Instance.new("BillboardGui")
-                espTag.Name = "RoleESP"
-                espTag.Size = UDim2.new(0,100,0,40)
-                espTag.AlwaysOnTop = true
-                espTag.StudsOffset = Vector3.new(0, 3, 0)
-                espTag.Adornee = head
-
-                local text = Instance.new("TextLabel", espTag)
-                text.Size = UDim2.new(1,0,1,0)
-                text.BackgroundTransparency = 1
-                text.TextColor3 = Color3.new(1, 1, 1)
-                text.TextStrokeTransparency = 0
-                text.Font = Enum.Font.SourceSansBold
-                text.TextScaled = true
-
-                local roleText = "INNOCENT"
-                local color = Color3.new(1, 1, 1)
-
-                if (plr.Backpack:FindFirstChild("Knife") or (plr.Character and plr.Character:FindFirstChild("Knife"))) then
-                    roleText = "MURDERER"
-                    color = Color3.new(1, 0, 0)
-                elseif (plr.Backpack:FindFirstChild("Gun") or (plr.Character and plr.Character:FindFirstChild("Gun"))) then
-                    roleText = "SHERIFF"
-                    color = Color3.new(0, 0, 1)
-                end
-
-                text.Text = roleText
-                text.TextColor3 = color
-                espTag.Parent = head
-            end
-        end
-    end
-end)
-
--- Walkspeed Slider
-SectionPlayer:NewSlider("Walkspeed", "Change your walkspeed", 200, 16, function(s)
+-- Player Settings
+SectionPlayer:NewSlider("Walkspeed", "Adjust Walkspeed", 100, 16, function(s)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
 end)
 
--- Jumppower Slider
-SectionPlayer:NewSlider("Jumppower", "Change your jumppower", 200, 50, function(s)
+SectionPlayer:NewSlider("Jumppower", "Adjust Jumppower", 150, 50, function(s)
     game.Players.LocalPlayer.Character.Humanoid.JumpPower = s
 end)
 
--- Reset Button
-SectionPlayer:NewButton("Reset WS/JP", "Resets walkspeed and jumppower", function()
-    local char = game.Players.LocalPlayer.Character
-    char.Humanoid.WalkSpeed = 16
-    char.Humanoid.JumpPower = 50
-end)
-
--- Beast Add-ons
-SectionExtras:NewButton("Godmode", "Immune to damage (client-sided)", function()
-    local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-    if hum then
-        hum.Name = "GodHumanoid"
-        local clone = hum:Clone()
-        clone.Name = "Humanoid"
-        clone.Parent = game.Players.LocalPlayer.Character
-        wait()
-        game.Players.LocalPlayer.Character:FindFirstChild("GodHumanoid"):Destroy()
+SectionPlayer:NewButton("Reset WS/JP", "Reset Walkspeed and Jumppower", function()
+    local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 16
+        humanoid.JumpPower = 50
     end
 end)
 
-SectionExtras:NewButton("Teleport to Gun", "Teleport to dropped gun if Sheriff dies", function()
-    for _, item in pairs(workspace:GetChildren()) do
-        if item.Name == "GunDrop" then
-            game.Players.LocalPlayer.Character:MoveTo(item.Position)
+-- Extras
+SectionExtras:NewButton("Role ESP", "Show roles (Innocent, Murderer, Sheriff)", function()
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr ~= game.Players.LocalPlayer then
+            local role = "Innocent"
+            if plr.Backpack:FindFirstChild("Gun") or (plr.Character and plr.Character:FindFirstChild("Gun")) then
+                role = "Sheriff"
+            elseif plr.Backpack:FindFirstChild("Knife") or (plr.Character and plr.Character:FindFirstChild("Knife")) then
+                role = "Murderer"
+            end
+            local Billboard = Instance.new("BillboardGui")
+            Billboard.Name = "RoleESP"
+            Billboard.Size = UDim2.new(0, 100, 0, 20)
+            Billboard.AlwaysOnTop = true
+            Billboard.Adornee = plr.Character:FindFirstChild("Head")
+            local text = Instance.new("TextLabel", Billboard)
+            text.Size = UDim2.new(1,0,1,0)
+            text.BackgroundTransparency = 1
+            text.Text = role
+            text.TextColor3 = Color3.new(1,1,1)
+            text.TextStrokeTransparency = 0
+            Billboard.Parent = plr.Character
         end
     end
 end)
 
-SectionExtras:NewButton("Silent Aim (Visual Only)", "Visual-only, makes shots appear accurate", function()
-    print("Silent Aim enabled (visual only)")
+-- TROLL SECTION
+SectionTroll:NewButton("Invisible Character", "Become invisible (visual glitch)", function()
+    local char = game.Players.LocalPlayer.Character
+    if char then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Transparency = 1
+            elseif part:IsA("Decal") then
+                part.Transparency = 1
+            end
+        end
+    end
 end)
 
-SectionExtras:NewButton("Destroy Hub UI", "Closes the UI completely", function()
-    game.CoreGui:FindFirstChild("KavoUI Library"):Destroy()
+SectionTroll:NewToggle("Loop Fling All", "Constantly flings all players", function(state)
+    getgenv().loopFlingAll = state
+    while getgenv().loopFlingAll do
+        wait(1)
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 1000, 0)
+            end
+        end
+    end
 end)
+
+SectionTroll:NewButton("Spam Chat", "Spams the chat with messages", function()
+    while true do
+        wait(0.5)
+        game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("MM2 OP HUB BEAST MODE 2025!", "All")
+    end
+end)
+
+SectionTroll:NewButton("Glitch Body Parts", "Glitches body parts by resizing", function()
+    local char = game.Players.LocalPlayer.Character
+    if char then
+        for _, part in pairs(char:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Size = part.Size * Vector3.new(5, 0.1, 5)
+            end
+        end
+    end
+end)
+
+SectionTroll:NewToggle("Spin Character", "Continuously spins your character", function(toggle)
+    getgenv().spinChar = toggle
+    while getgenv().spinChar do
+        wait(0.1)
+        local char = game.Players.LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
+        end
+    end
+end)
+
+SectionTroll:NewLabel("Use with caution, have fun trolling!")
