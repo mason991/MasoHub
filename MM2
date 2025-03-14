@@ -1,0 +1,173 @@
+-- Load Kavo UI Library
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("MM2 OP Hub - Beast Mode", "Ocean")
+
+-- Notification on Script Execution
+local StarterGui = game:GetService("StarterGui")
+StarterGui:SetCore("SendNotification", {
+    Title = "MM2 OP Hub",
+    Text = "Script Executed - Enjoy!",
+    Duration = 5
+})
+
+-- Tabs
+local TabMain = Window:NewTab("Main")
+local TabPlayer = Window:NewTab("Player")
+local TabExtras = Window:NewTab("Extras")
+
+-- Sections
+local SectionMain = TabMain:NewSection("MM2 Features")
+local SectionPlayer = TabPlayer:NewSection("Player Settings")
+local SectionExtras = TabExtras:NewSection("Beast Features")
+
+-- MM2 Kill All
+SectionMain:NewButton("Kill All", "Kills all players (if Murderer)", function()
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") then
+            v.Character.Humanoid.Health = 0
+        end
+    end
+end)
+
+-- MM2 Fling Murderer
+SectionMain:NewButton("Fling Murderer", "Flings the Murderer", function()
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr ~= game.Players.LocalPlayer and (plr.Backpack:FindFirstChild("Knife") or (plr.Character and plr.Character:FindFirstChild("Knife"))) then
+            local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.Velocity = Vector3.new(200, 200, 200)
+            end
+        end
+    end
+end)
+
+-- MM2 Fling Sheriff
+SectionMain:NewButton("Fling Sheriff", "Flings the Sheriff", function()
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr ~= game.Players.LocalPlayer and (plr.Backpack:FindFirstChild("Gun") or (plr.Character and plr.Character:FindFirstChild("Gun"))) then
+            local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.Velocity = Vector3.new(200, 200, 200)
+            end
+        end
+    end
+end)
+
+-- MM2 Auto Coin Collect
+SectionMain:NewButton("Auto Collect Coins", "Teleports to coins automatically", function()
+    getgenv().autoCoinCollect = true
+    while getgenv().autoCoinCollect do
+        wait(0.5)
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v.Name == "CoinContainer" or v.Name == "Coin" then
+                pcall(function()
+                    game.Players.LocalPlayer.Character:MoveTo(v.Position)
+                end)
+            end
+        end
+    end
+end)
+
+-- MM2 Auto Win - Teleport to Map
+SectionMain:NewButton("Auto Win (Teleport to Map)", "Teleports you to MM2 map spawn", function()
+    local map = workspace:FindFirstChild("Map")
+    if map then
+        local spawn = map:FindFirstChildWhichIsA("SpawnLocation")
+        if spawn then
+            game.Players.LocalPlayer.Character:MoveTo(spawn.Position)
+        else
+            for _, v in pairs(map:GetDescendants()) do
+                if v:IsA("BasePart") and v.Name:lower():find("spawn") then
+                    game.Players.LocalPlayer.Character:MoveTo(v.Position)
+                    break
+                end
+            end
+        end
+    end
+end)
+
+-- MM2 Role ESP (Improved Detection)
+SectionMain:NewButton("Enable Role ESP", "Shows Murderer & Sheriff", function()
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr ~= game.Players.LocalPlayer then
+            local head = plr.Character and plr.Character:FindFirstChild("Head")
+            if head and not head:FindFirstChild("RoleESP") then
+                local espTag = Instance.new("BillboardGui")
+                espTag.Name = "RoleESP"
+                espTag.Size = UDim2.new(0,100,0,40)
+                espTag.AlwaysOnTop = true
+                espTag.StudsOffset = Vector3.new(0, 3, 0)
+                espTag.Adornee = head
+
+                local text = Instance.new("TextLabel", espTag)
+                text.Size = UDim2.new(1,0,1,0)
+                text.BackgroundTransparency = 1
+                text.TextColor3 = Color3.new(1, 1, 1)
+                text.TextStrokeTransparency = 0
+                text.Font = Enum.Font.SourceSansBold
+                text.TextScaled = true
+
+                local roleText = "INNOCENT"
+                local color = Color3.new(1, 1, 1)
+
+                if (plr.Backpack:FindFirstChild("Knife") or (plr.Character and plr.Character:FindFirstChild("Knife"))) then
+                    roleText = "MURDERER"
+                    color = Color3.new(1, 0, 0)
+                elseif (plr.Backpack:FindFirstChild("Gun") or (plr.Character and plr.Character:FindFirstChild("Gun"))) then
+                    roleText = "SHERIFF"
+                    color = Color3.new(0, 0, 1)
+                end
+
+                text.Text = roleText
+                text.TextColor3 = color
+                espTag.Parent = head
+            end
+        end
+    end
+end)
+
+-- Walkspeed Slider
+SectionPlayer:NewSlider("Walkspeed", "Change your walkspeed", 200, 16, function(s)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+end)
+
+-- Jumppower Slider
+SectionPlayer:NewSlider("Jumppower", "Change your jumppower", 200, 50, function(s)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = s
+end)
+
+-- Reset Button
+SectionPlayer:NewButton("Reset WS/JP", "Resets walkspeed and jumppower", function()
+    local char = game.Players.LocalPlayer.Character
+    char.Humanoid.WalkSpeed = 16
+    char.Humanoid.JumpPower = 50
+end)
+
+-- Beast Add-ons
+SectionExtras:NewButton("Godmode", "Immune to damage (client-sided)", function()
+    local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+    if hum then
+        hum.Name = "GodHumanoid"
+        local clone = hum:Clone()
+        clone.Name = "Humanoid"
+        clone.Parent = game.Players.LocalPlayer.Character
+        wait()
+        game.Players.LocalPlayer.Character:FindFirstChild("GodHumanoid"):Destroy()
+    end
+end)
+
+SectionExtras:NewButton("Teleport to Gun", "Teleport to dropped gun if Sheriff dies", function()
+    for _, item in pairs(workspace:GetChildren()) do
+        if item.Name == "GunDrop" then
+            game.Players.LocalPlayer.Character:MoveTo(item.Position)
+        end
+    end
+end)
+
+SectionExtras:NewButton("Silent Aim (Visual Only)", "Visual-only, makes shots appear accurate", function()
+    print("Silent Aim enabled (visual only)")
+end)
+
+SectionExtras:NewButton("Destroy Hub UI", "Closes the UI completely", function()
+    game.CoreGui:FindFirstChild("KavoUI Library"):Destroy()
+end)
